@@ -33,8 +33,6 @@ const newUserHandler = async (data) => {
 };
 
 const NewUser = () => {
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
-
     const {
         register,
         handleSubmit,
@@ -45,28 +43,23 @@ const NewUser = () => {
     });
 
     const queryClient = useQueryClient();
-    const { mutate } = useMutation(newUserHandler, {
+    const { mutate, isLoading } = useMutation(newUserHandler, {
         onSuccess: (data) => {
-            setIsSubmitting(false);
             reset();
             queryClient.invalidateQueries('users');
         },
         onError: (error) => {
-            setIsSubmitting(false);
             alert(error.message);
+        },
+        onMutate: (data) => {
+            // sedang memproses data
+            console.log(data);
         },
     });
 
     const onSubmit = async (data) => {
-        setIsSubmitting(true);
         mutate(data);
     };
-
-    React.useEffect(() => {
-        if (Object.keys(errors).length > 0) {
-            setIsSubmitting(false);
-        }
-    }, [errors]);
 
     return (
         <div className='w-full max-w-xs mx-auto space-y-12 bg-transparent rounded-lg shadow-lg p-7'>
@@ -105,7 +98,7 @@ const NewUser = () => {
                 </div>
 
                 <div className='space-y-2'>
-                    {isSubmitting ? (
+                    {isLoading ? (
                         <Button
                             title='Sedang di Proses...'
                             className='bg-red-500 hover:bg-red-600'
