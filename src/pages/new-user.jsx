@@ -42,18 +42,33 @@ const NewUser = () => {
         resolver: yupResolver(yupLoginSchema),
     });
 
+    const [errMsg, setErrMsg] = React.useState(null);
+
     const queryClient = useQueryClient();
     const { mutate, isLoading } = useMutation(newUserHandler, {
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
             reset();
-            queryClient.invalidateQueries('users');
+            await queryClient.invalidateQueries('users');
         },
-        onError: (error) => {
-            alert(error.message);
+        onError: async (error) => {
+            setErrMsg(error.message);
         },
-        onMutate: (data) => {
-            // sedang memproses data
-            console.log(data);
+        onMutate: async (data) => {
+            // optimstic update 😍😍
+            // 1. cancel any outgoing refetches
+            // (so they don't overwrite our optimistic update)
+            await queryClient.cancelQueries('users');
+            // 2. snapshot the previous value
+            const previousUsers = queryClient.getQueryData('users');
+            // 3. optimistically update to the new value
+            if (previousUsers) {
+                queryClient.setQueryData('users', (old) => [
+                    ...old,
+                    { id: Date.now(), email: data.email },
+                ]);
+            }
+            // 4. return a rollback function
+            return () => queryClient.setQueryData('users', previousUsers);
         },
     });
 
@@ -63,6 +78,7 @@ const NewUser = () => {
 
     return (
         <div className='w-full max-w-xs mx-auto space-y-12 bg-transparent rounded-lg shadow-lg p-7'>
+            {errMsg && <h1 className='text-red-500'>{errMsg} </h1>}
             <form onSubmit={handleSubmit(onSubmit)} className='space-y-5'>
                 <div className='flex flex-col gap-1'>
                     <label htmlFor='email'>Alamat Email</label>

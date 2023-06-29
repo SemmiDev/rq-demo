@@ -29,6 +29,11 @@
       "email": "sam@g.com",
       "password": "asd123@@AA",
       "id": 6
+    },
+    {
+      "email": "laalaoptimistic@gmail.com",
+      "password": "laalaoptimistic@gmail.comA@A#2",
+      "id": 7
     }
   ]
 }

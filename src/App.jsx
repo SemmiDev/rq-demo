@@ -26,7 +26,7 @@ function App() {
         'users',
         getUsersHandler,
         {
-            // staleTime: 5000, // durasi data di cache (sampai dianggap usang)
+            staleTime: 15_000, // durasi data di cache (sampai dianggap usang)
         }
     );
 
